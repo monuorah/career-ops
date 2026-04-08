@@ -9,10 +9,13 @@ Ejecutar como subagente para no consumir contexto del main:
 ```
 Agent(
     subagent_type="general-purpose",
+    model="haiku",
     prompt="[contenido de este archivo + datos específicos]",
     run_in_background=True
 )
 ```
+
+> **Model:** Always use `model="haiku"` when launching the scan subagent. Scan is search/scrape work — it does not require deep reasoning. Using Haiku conserves usage limits.
 
 ## Configuración
 

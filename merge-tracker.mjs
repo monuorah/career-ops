@@ -196,7 +196,7 @@ const existingApps = [];
 let maxNum = 0;
 
 for (const line of appLines) {
-  if (line.startsWith('|') && !line.includes('---') && !line.includes('Empresa')) {
+  if (line.startsWith('|') && !line.includes('---') && !line.includes('Empresa') && !line.includes('Company')) {
     const app = parseAppLine(line);
     if (app) {
       existingApps.push(app);
@@ -332,4 +332,9 @@ if (VERIFY && !DRY_RUN) {
   } catch (e) {
     process.exit(1);
   }
+}
+
+if (skipped > 0) {
+  console.error(`\n⚠️  ${skipped} TSV(s) failed to parse — review batch/tracker-additions/merged/ for malformed files`);
+  process.exit(2);
 }

@@ -1,25 +1,184 @@
 # Modo: pdf — Generación de PDF ATS-Optimizado
 
-## Pipeline completo
+## MANDATORY: Dynamic Narrative Skills Generation
 
-1. Lee `cv.md` como fuentes de verdad
-2. Pide al usuario el JD si no está en contexto (texto o URL)
-3. Extrae 15-20 keywords del JD
-4. Detecta idioma del JD → idioma del CV (EN default)
-5. Detecta ubicación empresa → formato papel:
-   - US/Canada → `letter`
-   - Resto del mundo → `a4`
-6. Detecta arquetipo del rol → adapta framing
-7. Reescribe Professional Summary inyectando keywords del JD + exit narrative bridge ("Built and sold a business. Now applying systems thinking to [domain del JD].")
-8. Selecciona top 3-4 proyectos más relevantes para la oferta
-9. Reordena bullets de experiencia por relevancia al JD
-10. Construye competency grid desde requisitos del JD (6-8 keyword phrases)
-11. Inyecta keywords naturalmente en logros existentes (NUNCA inventa)
-12. Genera HTML completo desde template + contenido personalizado
-13. Lee `name` de `config/profile.yml` → normaliza a kebab-case lowercase (e.g. "John Doe" → "john-doe") → `{candidate}`
-14. Escribe HTML a `/tmp/cv-{candidate}-{company}.html`
-15. Ejecuta: `node generate-pdf.mjs /tmp/cv-{candidate}-{company}.html output/cv-{candidate}-{company}-{YYYY-MM-DD}.pdf --format={letter|a4}`
-15. Reporta: ruta del PDF, nº páginas, % cobertura de keywords
+**ALWAYS generate narrative skills from cv.md, tailored to THIS JD. NEVER use comma-separated lists or hardcoded orderings.**
+
+### Format (Non-Negotiable)
+
+Each skill entry:
+- `**Skill Category** - proof/context from cv.md; additional proof; context`
+- 1-2 lines max (~100-180 characters)
+- Examples from real CVs:
+  - `**Python** - 3 production libraries shipped to Dell SDL team (37.5% coverage); Binary Ant Colony Algorithm in published research; Flask web interface for AI tool`
+  - `**Docker & Infrastructure** - containerized parallel test execution across 3 VMware products at Dell; environment isolation design; Robot Framework integration into CI/CD pipeline`
+  - `**AI & Automation** - AutoGen multi-agent pipeline with Llama 3.2 LLM; two-agent orchestration for code vulnerability detection; Firebase AI integration in consumer app`
+- Generate 6-8 entries total
+- Color the category name (rendered as `<span class="cat">Category</span>`)
+
+### How to Build Narrative Skills (Step-by-Step)
+
+**Step 1: Extract all skill contexts from cv.md**
+
+Scan cv.md for every mention of a technology and extract what you actually did with it. Examples:
+
+From Dell internship:
+- **Python** → "Developed 3 custom Python libraries", "increased automated SDL test coverage by 37.5%"
+- **Docker** → "Designed containerized security testing infrastructure", "enabling parallel test execution across VxRail, Configuration Portal, and DPC VMware products"
+- **Robot Framework** → "Integrated Robot Framework test suites with existing CVF security tools"
+- **AutoGen** → "Built an AI-powered security analysis tool using AutoGen multi-agent framework", "Llama 3.2 LLM"
+
+From FoodLens project:
+- **SwiftUI** → "Built native iOS nutrition tracking app with SwiftUI", "15+ views including multi-step onboarding, meal logging, trends visualization"
+- **Firebase** → "Firebase backend (Auth, Firestore, Storage, Cloud Functions)"
+- **APIs** → "Open Food Facts API integration", "USDA API", "barcode scanning"
+
+From Museum project:
+- **React** → "15+ MySQL tables, React frontend", "role-based access control across 4 user types"
+- **Node.js/Express** → "Node/Express API", "real-time inventory deduction", "PDF report generation"
+- **MySQL** → "15+ MySQL tables", "complex multi-table JOIN queries", "soft delete/restore patterns with audit logging"
+
+**Step 2: Detect JD themes (what THIS job cares about)**
+
+Read the JD and identify 3-5 major themes:
+- Keywords: "backend", "infrastructure", "scalability" → Backend Engineer theme
+- Keywords: "security", "vulnerability", "compliance", "SDL" → Security Engineer theme
+- Keywords: "AI", "LLM", "agents", "automation" → AI/Automation theme
+- Keywords: "React", "frontend", "UI", "component" → Frontend theme
+- Keywords: "infrastructure", "Docker", "Kubernetes", "CI/CD" → DevOps/Infrastructure theme
+- Keywords: "compliance", "regulated", "audit", "standards" → Compliance/Regulated Systems theme
+
+**Step 3: Match cv.md skills to JD themes**
+
+For each JD theme, find which skills from Step 1 support it:
+
+Example: JD for Full Stack role emphasizes "e-commerce platform", "React frontend", "database design"
+- Match to **React** (museum e-commerce platform, 4 user types, role-based UI)
+- Match to **Node.js/Express** (museum REST API, checkout flow, inventory)
+- Match to **MySQL** (15+ table schema, audit logging)
+- Match to **Azure/Deployment** (deployed on Azure)
+
+Example: JD for Security role emphasizes "SDL", "vulnerability scanning", "compliance"
+- Match to **Python** (SDL automation, 3 libraries, 37.5% coverage)
+- Match to **Docker & Infrastructure** (containerized testing across products)
+- Match to **Regulated Systems** (SDL 7.3 compliance evidence, built tooling for changing control requirements)
+- Match to **Robot Framework** (security test orchestration)
+
+**Step 4: Rank matched skills by JD relevance**
+
+Order the matched skills from Step 3 by how central they are to the JD:
+1. Most relevant (appears in JD description multiple times, core to the role)
+2. Moderately relevant (supports main theme)
+3. Supporting (adds credibility, shows depth)
+
+**Step 5: Build narrative entries**
+
+For each matched skill (in ranked order), construct: `**Category** - proof1; proof2; proof3`
+
+- **Proof 1:** The biggest achievement or most relevant context from cv.md
+- **Proof 2:** A supporting detail (another achievement, tool, metric, or breadth)
+- **Proof 3:** Additional context if space allows (research, integration, deployment)
+
+Keep each entry to 1-2 lines by concatenating proofs with semicolons.
+
+Example construction:
+- Matched skill: **Python** (for Security JD)
+- Proofs from cv.md:
+  1. "3 production libraries shipped to Dell enterprise SDL team"
+  2. "37.5% increased automated test coverage"
+  3. "Binary Ant Colony Algorithm in published research"
+- Result: `**Python** - 3 production libraries shipped to Dell enterprise SDL team (37.5% coverage increase); Binary Ant Colony Algorithm in published research; Flask web interface for AI tool`
+
+**Step 6: Generate HTML**
+
+Output as:
+```html
+<ul class="skills-list">
+  <li><span class="cat">Python</span> - proof1; proof2; proof3</li>
+  <li><span class="cat">Docker & Infrastructure</span> - proof1; proof2</li>
+  <!-- ... 6-8 total entries ... -->
+</ul>
+```
+
+**Step 7: Inject into template**
+
+Replace `{{SKILLS}}` with the HTML from Step 6.
+
+---
+
+### Key Rules (Non-Negotiable)
+
+- **Never hardcode skill order.** Every PDF must be different based on the JD.
+- **Extract proofs from cv.md only.** Never invent achievements or metrics.
+- **Match JD themes to cv.md skills dynamically.** Don't rely on archetype tables; use the actual JD text.
+- **Omit irrelevant skills.** If a skill doesn't match any JD theme, don't include it (even if it's in cv.md).
+- **Minimum 5, maximum 8 entries.** Aim for 6-7.
+- **One skill per entry.** Don't combine unrelated skills (e.g., `Python & JavaScript` together).
+- **Focus on proof, not definition.** Not "Python — A programming language" but "Python — 3 production libraries shipped to Dell SDL team".
+
+---
+
+## PDF Generation Pipeline
+
+1. **Read source files**
+   - `cv.md` (all skill contexts, proofs, metrics)
+   - `config/profile.yml` (name, contact, location)
+   - JD (user provides URL or text)
+
+2. **Detect job metadata**
+   - Extract company name and job title from JD
+   - Detect JD language → CV language (EN default)
+   - Detect company location → paper format (US/Canada → letter, else → a4)
+
+3. **Extract JD themes (for skill matching)**
+   - Read JD text and identify 3-5 major themes
+   - Examples: Backend/infrastructure, Security/compliance, AI/LLMs, Full-stack/frontend, DevOps
+   - Note key repeated keywords and phrases
+
+4. **Build narrative skills section** ← **KEY STEP (see detailed instructions above)**
+   - Follow "How to Build Narrative Skills" section above
+   - Extract skill contexts from cv.md (Step 1)
+   - Match to JD themes (Step 3)
+   - Rank by JD relevance (Step 4)
+   - Build 6-8 narrative entries (Step 5)
+   - Generate HTML (Step 6)
+   - Result: HTML ready for `{{SKILLS}}` placeholder
+
+5. **Generate other CV sections**
+   - **Professional Summary:** Rewrite for role (3-4 sentences), inject top JD keywords + exit narrative bridge
+   - **Core Competencies:** Extract 6-8 keyword phrases from JD requirements
+   - **Work Experience:** Reorder bullets by JD relevance (most relevant first)
+   - **Projects:** Select top 3-4 most relevant projects; reorder bullets within each
+   - **Education & Leadership:** Keep as-is (static sections)
+
+6. **Inject keywords ethically**
+   - Use exact JD vocabulary when reformulating existing cv.md content
+   - Example: JD says "RAG pipelines" + CV says "LLM workflows with retrieval" → rewrite as "RAG pipeline design and LLM orchestration workflows"
+   - NEVER invent skills or achievements
+
+7. **Generate HTML from template**
+   - Read `templates/cv-user-template.html`
+   - Replace all `{{...}}` placeholders with personalized content from Steps 4-5
+   - Ensure `{{SKILLS}}` is replaced with the narrative skills HTML from Step 4
+
+8. **Normalize candidate name**
+   - Read `preferred_name` from `config/profile.yml`
+   - Convert to kebab-case lowercase (e.g., "Muna Onuorah" → "muna-onuorah")
+   - Use as `{candidate}` in filenames
+
+9. **Write HTML to temp file**
+   - Path: `/tmp/cv-{candidate}-{company}.html`
+   - Ensure all fonts and styles are self-contained (ATS compatibility)
+
+10. **Render to PDF**
+    - Execute: `node generate-pdf.mjs /tmp/cv-{candidate}-{company}.html output/cv-{candidate}-{company}-{YYYY-MM-DD}.pdf --format={letter|a4}`
+    - Verify file exists and is > 50KB
+
+11. **Report results**
+    - PDF file path
+    - Page count
+    - Verification: Confirm narrative skills appear in output
+    - Note: JD theme coverage (which themes matched and were emphasized)
 
 ## Reglas ATS (parseo limpio)
 

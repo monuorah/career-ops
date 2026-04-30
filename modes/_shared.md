@@ -14,12 +14,13 @@
 |------|------|------|
 | cv.md | `cv.md` (project root) | ALWAYS |
 | article-digest.md | `article-digest.md` (if exists) | ALWAYS (detailed proof points) |
-| profile.yml | `config/profile.yml` | ALWAYS (candidate identity and targets) |
-| _profile.md | `modes/_profile.md` | ALWAYS (user archetypes, narrative, negotiation) |
+| profile.yml | `config/profile.yml` | ALWAYS (candidate identity, targets, **CV generation config**) |
+| _profile.md | `modes/_profile.md` | ALWAYS (user archetypes, narrative, negotiation, **mandatory CV rules**) |
 
 **RULE: NEVER hardcode metrics from proof points.** Read them from cv.md + article-digest.md at evaluation time.
 **RULE: For article/project metrics, article-digest.md takes precedence over cv.md.**
 **RULE: Read _profile.md AFTER this file. User customizations in _profile.md override defaults here.**
+**RULE: For PDF/CV generation, ALWAYS generate narrative skills (5+ entries with category + description). NEVER use comma-separated lists. See modes/pdf.md for mandatory format and examples.**
 
 ---
 
@@ -104,6 +105,7 @@ After detecting archetype, read `modes/_profile.md` for the user's specific fram
 1. Read cv.md, _profile.md, and article-digest.md (if exists) before evaluating
 1b. **First evaluation of each session:** Run `node cv-sync-check.mjs`. If warnings, notify user.
 2. Detect the role archetype and adapt framing per _profile.md
+2b. **For CV generation: Select and rank skills by role archetype** (see modes/pdf.md skill prioritization table). Never include off-topic skills (e.g., iOS/SwiftUI for a Backend role). De-prioritize generic "Full-Stack" for specialized roles.
 3. Cite exact lines from CV when matching
 4. Use WebSearch for comp and company data
 5. Register in tracker after evaluating

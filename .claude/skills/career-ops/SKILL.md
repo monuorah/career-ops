@@ -69,17 +69,28 @@ Or paste a JD directly to run the full pipeline.
 
 ## Context Loading by Mode
 
-After determining the mode, load the necessary files before executing:
+After determining the mode, load the necessary files before executing.
+
+**IMPORTANT: All paths are relative to the project root (`/Users/muna/Documents/Resumes/career-ops/`). Use absolute paths if working directory is unclear.**
 
 ### Modes that require `_shared.md` + their mode file:
-Read `modes/_shared.md` + `modes/{mode}.md`
 
 Applies to: `auto-pipeline`, `oferta`, `ofertas`, `pdf`, `contacto`, `apply`, `pipeline`, `scan`, `batch`
 
+**Before executing, read BOTH files in this order:**
+1. `/Users/muna/Documents/Resumes/career-ops/modes/_shared.md`
+2. `/Users/muna/Documents/Resumes/career-ops/modes/{mode}.md`
+
+(Use absolute paths to ensure both Claude Code and OpenCode find the files correctly.)
+
 ### Standalone modes (only their mode file):
-Read `modes/{mode}.md`
 
 Applies to: `tracker`, `deep`, `training`, `project`, `patterns`, `followup`
+
+**Before executing, read:**
+1. `/Users/muna/Documents/Resumes/career-ops/modes/{mode}.md`
+
+(Use absolute path to ensure file is found correctly.)
 
 ### Modes delegated to subagent:
 For `scan`, `apply` (with Playwright), and `pipeline` (3+ URLs): launch as Agent with the content of `_shared.md` + `modes/{mode}.md` injected into the subagent prompt.
